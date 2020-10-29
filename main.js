@@ -20,7 +20,7 @@
     game.fps = 60;
     game.scaleToWindow();
 
-    let gameScene, background, playingGround, player;
+    let gameScene, background, playingGround, player, AI;
 
     function load() {
 
@@ -48,10 +48,18 @@
         player = game.sprite("resources/paddle.png");
         player.pivotX = 0.5;
         player.pivotY = 0.5;
-        player.x = 48;
+        player.x = 64;
         player.y = 324;
 
-        playingGround.addChild(player);
+        gameScene.addChild(player);
+
+        AI = game.sprite("resources/paddle.png");
+        AI.pivotX = 0.5;
+        AI.pivotY = 0.5;
+        AI.x = 736;
+        AI.y = 324;
+
+        gameScene.addChild(AI);
 
     }
 
