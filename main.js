@@ -20,7 +20,22 @@
     game.fps = 60;
     game.scaleToWindow();
 
-    let gameScene, background, playingGround, player, AI, ball;
+    let gameScene, background, playingGround, player, AI, ball, scoreScene;
+
+    let playerScore = {
+        first : 0,
+        second : 0,
+        third : 0
+    };
+
+    let AIScore = {
+        first : 0,
+        second : 0,
+        third : 0
+    };
+
+    let playerScoreSprites = [];
+    let AIScoreSprites = [];
 
     function load() {
 
@@ -37,10 +52,10 @@
         gameScene.addChild(background);
 
         playingGround = game.group(
-            game.line("white", 1, 32, 72, 32, 576),
-            game.line("white", 1, 32, 72, 768, 72),
+            game.line("white", 1, 32, 88, 32, 576),
+            game.line("white", 1, 32, 88, 768, 88),
             game.line("white", 1, 32, 576, 768, 576),
-            game.line("white", 1, 768, 72, 768, 576)
+            game.line("white", 1, 768, 88, 768, 576)
         );
 
         gameScene.addChild(playingGround);
@@ -68,6 +83,35 @@
         ball.y = 324;
 
         gameScene.addChild(ball);
+
+        for (let i = 0; i < 3; i++) {
+
+            playerScoreSprites[i] = [];
+            AIScoreSprites[i] = [];
+
+            for (let y = 0; y < 10; y++) {
+
+                let playerNumber = game.sprite("resources/" + y + ".png");
+                playerNumber.x = 232 - (i * 48);
+                playerNumber.y = 12;
+                playerNumber.visible = y === 0;
+
+                let AINumber = game.sprite("resources/" + y + ".png");
+                AINumber.x = 632 - (i * 48);
+                AINumber.y = 12;
+                AINumber.visible = y === 0;
+
+                playerScoreSprites[i].push(playerNumber);
+                AIScoreSprites[i].push(AINumber);
+
+                gameScene.addChild(playerNumber);
+                gameScene.addChild(AINumber);
+
+            }
+
+        }
+
+
 
     }
 
