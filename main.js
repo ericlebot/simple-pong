@@ -20,7 +20,7 @@
     game.fps = 60;
     game.scaleToWindow();
 
-    let gameScene, background, playingGround, player, AI;
+    let gameScene, background, playingGround, player, AI, ball;
 
     function load() {
 
@@ -60,6 +60,14 @@
         AI.y = 324;
 
         gameScene.addChild(AI);
+
+        ball = game.sprite("resources/ball.png");
+        ball.pivotX = 0.5;
+        ball.pivotY = 0.5;
+        ball.x = 400;
+        ball.y = 324;
+
+        gameScene.addChild(ball);
 
     }
 
