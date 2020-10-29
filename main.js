@@ -20,7 +20,7 @@
     game.fps = 60;
     game.scaleToWindow();
 
-    let background, playingGround;
+    let gameScene, background, playingGround;
 
     function load() {
 
@@ -44,6 +44,8 @@
         );
 
         gameScene.addChild(playingGround);
+
+
 
     }
 
