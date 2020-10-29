@@ -20,6 +20,8 @@
     game.fps = 60;
     game.scaleToWindow();
 
+    let background;
+
     function load() {
 
         game.loadingBar();
@@ -27,6 +29,12 @@
     }
 
     function setup() {
+
+        gameScene = game.group();
+
+        background = game.sprite("resources/background.png");
+
+        gameScene.addChild(background);
 
     }
 
