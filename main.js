@@ -1,4 +1,4 @@
-(function() {
+//(function() {
     let assets =
         [
             "resources/background.png",
@@ -37,6 +37,13 @@
     let playerScoreSprites = [];
     let AIScoreSprites = [];
 
+    let playingArea = {
+        x: 32,
+        y: 88,
+        width: 768,
+        height: 576
+    };
+
     function load() {
 
         game.loadingBar();
@@ -51,28 +58,20 @@
 
         gameScene.addChild(background);
 
-        playingGround = game.group(
-            game.line("white", 1, 32, 88, 32, 576),
-            game.line("white", 1, 32, 88, 768, 88),
-            game.line("white", 1, 32, 576, 768, 576),
-            game.line("white", 1, 768, 88, 768, 576)
-        );
-
-        gameScene.addChild(playingGround);
+        gameScene.addChild(game.line("white", 1, 32, 88, 32, 576));
+        gameScene.addChild(game.line("white", 1, 32, 88, 768, 88));
+        gameScene.addChild(game.line("white", 1, 32, 576, 768, 576));
+        gameScene.addChild(game.line("white", 1, 768, 88, 768, 576));
 
         player = game.sprite("resources/paddle.png");
-        player.pivotX = 0.5;
-        player.pivotY = 0.5;
-        player.x = 64;
-        player.y = 324;
+        player.x = 60;
+        player.y = 309;
 
         gameScene.addChild(player);
 
         AI = game.sprite("resources/paddle.png");
-        AI.pivotX = 0.5;
-        AI.pivotY = 0.5;
-        AI.x = 736;
-        AI.y = 324;
+        AI.x = 732;
+        AI.y = 309;
 
         gameScene.addChild(AI);
 
@@ -111,14 +110,56 @@
 
         }
 
+        //let zone = game.rectangle(724, 476, "white", "white", 0, 38, 94);
+        //gameScene.addChild(zone);
+
+        game.keyboard(13).press = () => {
+
+            if (game.state !== play) {
+
+                game.state = play;
+
+            }
+
+        };
+
+        let upArrow = game.keyboard(40),
+            downArrow = game.keyboard(38);
+
+        upArrow.press = () => {
+            player.vy = 5;
+        };
+        upArrow.release = () => {
+            if (!downArrow.isDown) {
+                player.vy = 0;
+            }
+        };
+
+        downArrow.press = () => {
+            player.vy = -5;
+        };
+        downArrow.release = () => {
+            if (!upArrow.isDown) {
+                player.vy = 0;
+            }
+        };
+
+    }
+
+    function play() {
+
+        game.contain(player, playingArea);
+
+        game.move(player);
+
+    }
+
+    function reset() {
+
 
 
     }
 
-    function play() { }
-
-    function reset() { }
-
     game.start();
 
-})();
+//})();
