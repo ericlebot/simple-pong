@@ -20,22 +20,9 @@
     game.fps = 60;
     game.scaleToWindow();
 
-    let gameScene, background, playingGround, player, AI, ball, scoreScene;
+    let gameScene, background, message, player, AI, ball, playerScore, AIScore, playerScoreSprites, AIScoreSprites;
 
-    let playerScore = {
-        first : 0,
-        second : 0,
-        third : 0
-    };
-
-    let AIScore = {
-        first : 0,
-        second : 0,
-        third : 0
-    };
-
-    let playerScoreSprites = [];
-    let AIScoreSprites = [];
+    let debug, dBallV, dPlayerV, dAIV;
 
     let playingArea = {
         x: 32,
@@ -51,6 +38,11 @@
     }
 
     function setup() {
+
+        debug = true;
+
+        playerScore = 0;
+        AIScore = 0;
 
         gameScene = game.group();
 
@@ -81,6 +73,9 @@
 
         gameScene.addChild(ball);
 
+        playerScoreSprites = [];
+        AIScoreSprites = [];
+
         for (let i = 0; i < 3; i++) {
 
             playerScoreSprites[i] = [];
@@ -108,14 +103,12 @@
 
         }
 
-        //let zone = game.rectangle(724, 476, "white", "white", 0, 38, 94);
-        //gameScene.addChild(zone);
-
         game.keyboard(13).press = () => {
 
             if (game.state !== play) {
 
                 game.state = play;
+                message.visible = false;
 
             }
 
@@ -125,25 +118,64 @@
             downArrow = game.keyboard(38);
 
         upArrow.press = () => {
+
             player.vy = 5;
+
         };
         upArrow.release = () => {
+
             if (!downArrow.isDown) {
+
                 player.vy = 0;
+
             }
+
         };
 
         downArrow.press = () => {
+
             player.vy = -5;
+
         };
         downArrow.release = () => {
+
             if (!upArrow.isDown) {
+
                 player.vy = 0;
+
             }
+
         };
 
-        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
-        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+
+        message = game.text("Press Enter to play", "14px Courier New", "white");
+        message.pivotX = 0.5;
+        message.pivotY = 0.5;
+        message.x = 400;
+        message.y = 44;
+        gameScene.addChild(message);
+
+
+        dBallV = game.text(ball.vx + ", " +  ball.vy, "14px Courier New", "white");
+        dBallV.x = 10;
+        dBallV.y = 10;
+        dBallV.visible = debug;
+        gameScene.addChild(dBallV);
+
+        dPlayerV = game.text(player.vx + ", " +  player.vy, "14px Courier New", "white");
+        dPlayerV.x = 10;
+        dPlayerV.y = 30;
+        dPlayerV.visible = debug;
+        gameScene.addChild(dPlayerV);
+
+        dAIV = game.text(AI.vx + ", " +  AI.vy, "14px Courier New", "white");
+        dAIV.x = 10;
+        dAIV.y = 50;
+        dAIV.visible = debug;
+        gameScene.addChild(dBallV);
+
 
     }
 
@@ -182,54 +214,127 @@
         }
 
         let ballHitsEdges = game.contain(ball, playingArea, true);
+        let scoreChanged = false;
 
         if (ballHitsEdges) {
 
             if (ballHitsEdges.has('right') || ballHitsEdges.has('left')) {
 
+                scoreChanged = true;
+
                 if (ballHitsEdges.has('right')) {
 
-                    incrementScore(playerScore);
+                    playerScore++;
 
                 } else if (ballHitsEdges.has('left')) {
 
-                    incrementScore(AIScore);
+                    AIScore++;
 
                 }
 
-                ball.x = 400;
-                ball.y = 324;
+                ball.x = 396;
+                ball.y = game.randomInt(220,420);
 
-                ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
-                ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+                ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+                ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
 
             }
 
         }
 
-    }
+        if (scoreChanged) {
 
-    function incrementScore(score) {
+            playerScoreSprites.forEach(a => {
 
-        if (score.first < 9) {
+                a.forEach(e => {
 
-            score.first++;
+                    e.visible = false;
 
-        } else if (score.second < 9) {
+                });
 
-            score.second++;
+            });
 
-        } else {
+            playerScoreSprites[0][playerScore % 10].visible = true;
+            playerScoreSprites[1][Math.floor((playerScore % 100) / 10)].visible = true;
+            playerScoreSprites[2][Math.floor((playerScore % 1000) / 100)].visible = true;
 
-            score.third++;
+            AIScoreSprites.forEach(a => {
+
+                a.forEach(e => {
+
+                    e.visible = false;
+
+                });
+
+            });
+
+            AIScoreSprites[0][AIScore % 10].visible = true;
+            AIScoreSprites[1][Math.floor((AIScore % 100) / 10)].visible = true;
+            AIScoreSprites[2][Math.floor((AIScore % 1000) / 100)].visible = true;
+
+            if (Math.abs(playerScore - AIScore) === 5) {
+
+                message.content = playerScore > AIScore ? "You win !" : "You lose !";
+                message.visible = true;
+
+                game.state = reset;
+
+            }
 
         }
 
+
+        dBallV.content = ball.vx + ", " +  ball.vy;
+
+        dPlayerV.content = player.vx + ", " +  player.vy;
+
+        dAIV.content = AI.vx + ", " +  AI.vy;
     }
 
     function reset() {
 
+        playerScore = 0;
+        AIScore = 0;
 
+        player.x = 60;
+        player.y = 309;
+
+        AI.x = 732;
+        AI.y = 309;
+
+        ball.x = 396;
+        ball.y = 320;
+
+        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+
+        playerScoreSprites.forEach(a => {
+
+            a.forEach(e => {
+
+                e.visible = false;
+
+            });
+
+        });
+
+        playerScoreSprites[0][0].visible = true;
+        playerScoreSprites[1][0].visible = true;
+        playerScoreSprites[2][0].visible = true;
+
+        AIScoreSprites.forEach(a => {
+
+            a.forEach(e => {
+
+                e.visible = false;
+
+            });
+
+        });
+
+        AIScoreSprites[0][0].visible = true;
+        AIScoreSprites[1][0].visible = true;
+        AIScoreSprites[2][0].visible = true;
 
     }
 
