@@ -13,16 +13,20 @@
             "resources/6.png",
             "resources/7.png",
             "resources/8.png",
-            "resources/9.png"
+            "resources/9.png",
+            "resources/paddle-hit.wav",
+            "resources/wall-hit.wav",
+            "resources/point.wav",
         ];
 
     let game = hexi(800, 600, setup, assets, load);
     game.fps = 60;
     game.scaleToWindow();
 
-    let gameScene, background, message, player, AI, ball, playerScore, AIScore, playerScoreSprites, AIScoreSprites;
+    let gameScene, background, message, player, AI, ball, playerScore, AIScore, playerScoreSprites, AIScoreSprites,
+        paddleHitSound, wallHitSound, pointSound;
 
-    let debug, dBallV, dPlayerV, dAIV;
+    let debug, dBallV, dPlayerV, dAIV, dBallVector;
 
     let playingArea = {
         x: 32,
@@ -43,6 +47,10 @@
 
         playerScore = 0;
         AIScore = 0;
+
+        paddleHitSound = game.sound("resources/paddle-hit.wav");
+        wallHitSound = game.sound("resources/wall-hit.wav");
+        pointSound = game.sound("resources/point.wav");
 
         gameScene = game.group();
 
@@ -148,7 +156,7 @@
         };
 
         ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
-        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(2,4);
 
         message = game.text("Press Enter to play", "14px Courier New", "white");
         message.pivotX = 0.5;
@@ -164,6 +172,10 @@
         dBallV.visible = debug;
         gameScene.addChild(dBallV);
 
+        dBallVector = game.line("white", 1, ball.x + ball.halfWidth, ball.y + ball.halfHeight, ball.x + ball.halfWidth + ball.vx * 3, ball.y + ball.halfHeight + ball.vy * 3);
+        dBallVector.visible = debug;
+        gameScene.addChild(dBallVector);
+
         dPlayerV = game.text(player.vx + ", " +  player.vy, "14px Courier New", "white");
         dPlayerV.x = 10;
         dPlayerV.y = 30;
@@ -175,7 +187,6 @@
         dAIV.y = 50;
         dAIV.visible = debug;
         gameScene.addChild(dBallV);
-
 
     }
 
@@ -189,16 +200,15 @@
 
         if (ball.vy > 0 && ball.y > (AI.y + AI.halfHeight)) {
 
-            AI.vy = 5;
+            AI.vy = ball.vy < 5 ? ball.vy : 5;
 
-        } else  if (ball.vy < 0 && ball.y < (AI.y + AI.halfHeight)) {
+        } else if (ball.vy < 0 && ball.y < (AI.y + AI.halfHeight)) {
 
-            AI.vy = -5;
+            AI.vy = ball.vy > -5 ? ball.vy : -5;
 
         } else {
 
             AI.vy = 0;
-
         }
 
         game.contain(AI, playingArea);
@@ -207,9 +217,16 @@
 
         if ((game.hitTestRectangle(player, ball) && ball.vx < 0) || (game.hitTestRectangle(AI, ball) && ball.vx > 0)) {
 
+            paddleHitSound.play();
+
+            if ((game.hitTestRectangle(player, ball) && player.vy !== 0) || (game.hitTestRectangle(AI, ball) && AI.vy !== 0)){
+
+                ball.vy += ((ball.vy < 0) ? -1 : 1);
+                ball.vx += ((ball.vx < 0) ? -1 : 1);
+
+            }
+
             ball.vx *= -1;
-            ball.vy += ((ball.vy < 0) ? -1 : 1) * 0.5;
-            ball.vx += ((ball.vx < 0) ? -1 : 1) * 0.5;
 
         }
 
@@ -219,6 +236,8 @@
         if (ballHitsEdges) {
 
             if (ballHitsEdges.has('right') || ballHitsEdges.has('left')) {
+
+                pointSound.play();
 
                 scoreChanged = true;
 
@@ -237,6 +256,10 @@
 
                 ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
                 ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+
+            } else {
+
+                wallHitSound.play();
 
             }
 
@@ -283,13 +306,20 @@
 
         }
 
+        dBallVector.ax = ball.x + ball.halfWidth;
+        dBallVector.ay = ball.y + ball.halfHeight;
+        dBallVector.bx = ball.x + ball.halfWidth + ball.vx * 3;
+        dBallVector.by = ball.y + ball.halfHeight + ball.vy * 3;
+
 
         dBallV.content = ball.vx + ", " +  ball.vy;
 
         dPlayerV.content = player.vx + ", " +  player.vy;
 
         dAIV.content = AI.vx + ", " +  AI.vy;
+
     }
+
 
     function reset() {
 
@@ -305,8 +335,8 @@
         ball.x = 396;
         ball.y = 320;
 
-        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
-        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(1,3);
+        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * game.randomInt(2,4);
 
         playerScoreSprites.forEach(a => {
 
