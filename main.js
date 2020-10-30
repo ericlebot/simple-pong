@@ -76,10 +76,8 @@
         gameScene.addChild(AI);
 
         ball = game.sprite("resources/ball.png");
-        ball.pivotX = 0.5;
-        ball.pivotY = 0.5;
-        ball.x = 400;
-        ball.y = 324;
+        ball.x = 396;
+        ball.y = 320;
 
         gameScene.addChild(ball);
 
@@ -144,13 +142,88 @@
             }
         };
 
+        ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+        ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+
     }
 
     function play() {
 
+        game.move(player);
+
         game.contain(player, playingArea);
 
-        game.move(player);
+        game.move(AI);
+
+        if (ball.vy > 0 && ball.y > (AI.y + AI.halfHeight)) {
+
+            AI.vy = 5;
+
+        } else  if (ball.vy < 0 && ball.y < (AI.y + AI.halfHeight)) {
+
+            AI.vy = -5;
+
+        } else {
+
+            AI.vy = 0;
+
+        }
+
+        game.contain(AI, playingArea);
+
+        game.move(ball);
+
+        if ((game.hitTestRectangle(player, ball) && ball.vx < 0) || (game.hitTestRectangle(AI, ball) && ball.vx > 0)) {
+
+            ball.vx *= -1;
+            ball.vy += ((ball.vy < 0) ? -1 : 1) * 0.5;
+            ball.vx += ((ball.vx < 0) ? -1 : 1) * 0.5;
+
+        }
+
+        let ballHitsEdges = game.contain(ball, playingArea, true);
+
+        if (ballHitsEdges) {
+
+            if (ballHitsEdges.has('right') || ballHitsEdges.has('left')) {
+
+                if (ballHitsEdges.has('right')) {
+
+                    incrementScore(playerScore);
+
+                } else if (ballHitsEdges.has('left')) {
+
+                    incrementScore(AIScore);
+
+                }
+
+                ball.x = 400;
+                ball.y = 324;
+
+                ball.vy = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+                ball.vx = (game.randomInt(0,1) === 0 ? -1 : 1) * 2;
+
+            }
+
+        }
+
+    }
+
+    function incrementScore(score) {
+
+        if (score.first < 9) {
+
+            score.first++;
+
+        } else if (score.second < 9) {
+
+            score.second++;
+
+        } else {
+
+            score.third++;
+
+        }
 
     }
 
